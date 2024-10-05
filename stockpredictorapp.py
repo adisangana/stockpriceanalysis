@@ -21,7 +21,7 @@ start_date = st.sidebar.date_input("Start Date", pd.to_datetime("2018-01-01"))
 end_date = st.sidebar.date_input("End Date", pd.to_datetime("2023-12-31"))
 
 # NewsAPI Client Initialization
-newsapi = NewsApiClient(api_key='your_newsapi_key_here')  # Replace with your NewsAPI key
+newsapi = NewsApiClient(api_key='f8f49c3781944e259ce310d89915cbff')  # Replace with your NewsAPI key
 analyzer = SentimentIntensityAnalyzer()
 
 # Fetch data when the button is pressed
