@@ -7,7 +7,7 @@ from sklearn.linear_model import LinearRegression
 import numpy as np
 
 # Streamlit App Title
-st.title("📈 Stock Price Predictor")
+st.title("📈 Stock Price Analysis")
 
 # Sidebar: User Input for Stock Ticker
 st.sidebar.header("User Input")
@@ -85,3 +85,20 @@ if st.sidebar.button("Analyze Stock"):
             st.error(f"An error occurred: {e}")
     else:
         st.error("Please enter a valid stock ticker symbol.")
+from newsapi import NewsApiClient
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+
+# Initialize the News API and Sentiment Analyzer
+newsapi = NewsApiClient(api_key='your_newsapi_key')
+analyzer = SentimentIntensityAnalyzer()
+
+# Fetch recent news related to the stock ticker
+news = newsapi.get_everything(q=ticker, language='en', sort_by='relevancy', page_size=5)
+
+# Display News Headlines and Sentiment Scores
+st.write(f"### Recent News and Sentiment for {ticker}")
+for article in news['articles']:
+    title = article['title']
+    sentiment = analyzer.polarity_scores(title)
+    st.write(f"**{title}**")
+    st.write(f"Sentiment Score: {sentiment['compound']}")
