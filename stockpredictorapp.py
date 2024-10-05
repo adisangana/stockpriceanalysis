@@ -5,9 +5,11 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 import numpy as np
+from newsapi import NewsApiClient
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 # Streamlit App Title
-st.title("📈 Stock Price Analysis")
+st.title("📈 Stock Price Analysis with News Sentiment")
 
 # Sidebar: User Input for Stock Ticker
 st.sidebar.header("User Input")
@@ -16,6 +18,10 @@ ticker = st.sidebar.text_input("Enter Stock Ticker Symbol (e.g., AAPL, MSFT):", 
 # Sidebar: Date Range Input
 start_date = st.sidebar.date_input("Start Date", pd.to_datetime("2018-01-01"))
 end_date = st.sidebar.date_input("End Date", pd.to_datetime("2023-12-31"))
+
+# NewsAPI Client Initialization
+newsapi = NewsApiClient(api_key='your_newsapi_key_here')  # Replace with your NewsAPI key
+analyzer = SentimentIntensityAnalyzer()
 
 # Fetch data when the button is pressed
 if st.sidebar.button("Analyze Stock"):
@@ -81,24 +87,24 @@ if st.sidebar.button("Analyze Stock"):
                 plt.legend()
                 st.pyplot(plt)
 
+                # Step 8: Fetch and Analyze Recent News Articles
+                st.write(f"### Recent News and Sentiment Analysis for {ticker}")
+                news = newsapi.get_everything(q=ticker, language='en', sort_by='relevancy', page_size=5)
+
+                # Display News Headlines and Sentiment Scores
+                if news['totalResults'] > 0:
+                    for article in news['articles']:
+                        title = article['title']
+                        description = article['description']
+                        url = article['url']
+                        sentiment = analyzer.polarity_scores(title + " " + (description if description else ""))
+
+                        st.write(f"**[{title}]({url})**")
+                        st.write(f"Sentiment Score: **{sentiment['compound']}** | Positive: {sentiment['pos']} | Neutral: {sentiment['neu']} | Negative: {sentiment['neg']}")
+                else:
+                    st.write(f"No news articles found for {ticker}.")
+
         except Exception as e:
             st.error(f"An error occurred: {e}")
     else:
         st.error("Please enter a valid stock ticker symbol.")
-from newsapi import NewsApiClient
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-
-# Initialize the News API and Sentiment Analyzer
-newsapi = NewsApiClient(api_key='your_newsapi_key')
-analyzer = SentimentIntensityAnalyzer()
-
-# Fetch recent news related to the stock ticker
-news = newsapi.get_everything(q=ticker, language='en', sort_by='relevancy', page_size=5)
-
-# Display News Headlines and Sentiment Scores
-st.write(f"### Recent News and Sentiment for {ticker}")
-for article in news['articles']:
-    title = article['title']
-    sentiment = analyzer.polarity_scores(title)
-    st.write(f"**{title}**")
-    st.write(f"Sentiment Score: {sentiment['compound']}")
