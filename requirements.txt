@@ -1,11 +1,11 @@
-streamlit==1.25.0
-yfinance==0.2.18
-pandas==1.5.3
-matplotlib==3.6.2
-scikit-learn==1.2.2  # Updated scikit-learn version
-numpy==1.23.4
-vaderSentiment==3.3.2
-newsapi-python==0.2.6
-plotly==5.11.0
-requests==2.26.0
-setuptools==65.5.0  # Added setuptools to resolve distutils issue
+streamlit
+yfinance
+pandas
+matplotlib
+scikit-learn
+numpy
+vaderSentiment
+newsapi-python
+plotly
+requests
+setuptools
