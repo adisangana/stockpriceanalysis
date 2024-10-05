@@ -7,6 +7,7 @@ from sklearn.linear_model import LinearRegression
 import numpy as np
 from newsapi import NewsApiClient
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+import plotly.graph_objs as go  # Importing Plotly for candlestick charts
 
 # Streamlit App Title
 st.title("📈 Stock Price Analysis with News Sentiment")
@@ -20,7 +21,7 @@ start_date = st.sidebar.date_input("Start Date", pd.to_datetime("2018-01-01"))
 end_date = st.sidebar.date_input("End Date", pd.to_datetime("2023-12-31"))
 
 # NewsAPI Client Initialization
-newsapi = NewsApiClient(api_key='f8f49c3781944e259ce310d89915cbff')  # Replace with your NewsAPI key
+newsapi = NewsApiClient(api_key='your_newsapi_key_here')  # Replace with your NewsAPI key
 analyzer = SentimentIntensityAnalyzer()
 
 # Fetch data when the button is pressed
@@ -39,19 +40,31 @@ if st.sidebar.button("Analyze Stock"):
                 st.write("#### Statistical Summary")
                 st.write(data.describe())
 
-                # Step 3: Visualize the Stock Prices and Moving Averages
+                # Step 3: Visualize the Stock Prices with Candlestick Chart
+                st.write(f"### {ticker} Stock Prices Candlestick Chart")
+
+                # Create a Plotly candlestick chart
+                fig = go.Figure(data=[go.Candlestick(x=data.index,
+                                                     open=data['Open'],
+                                                     high=data['High'],
+                                                     low=data['Low'],
+                                                     close=data['Close'],
+                                                     increasing_line_color='green',
+                                                     decreasing_line_color='red')])
+
+                # Add moving averages to the candlestick chart
                 data['SMA_50'] = data['Close'].rolling(window=50).mean()
                 data['SMA_200'] = data['Close'].rolling(window=200).mean()
-                st.write(f"### {ticker} Stock Prices with Moving Averages")
-                plt.figure(figsize=(14, 7))
-                plt.plot(data['Close'], label='Closing Prices')
-                plt.plot(data['SMA_50'], label='50-Day SMA')
-                plt.plot(data['SMA_200'], label='200-Day SMA')
-                plt.title(f'{ticker} Stock Price with Moving Averages')
-                plt.xlabel('Date')
-                plt.ylabel('Price in USD')
-                plt.legend()
-                st.pyplot(plt)
+                fig.add_trace(go.Scatter(x=data.index, y=data['SMA_50'], mode='lines', name='50-Day SMA'))
+                fig.add_trace(go.Scatter(x=data.index, y=data['SMA_200'], mode='lines', name='200-Day SMA'))
+
+                # Customize chart layout
+                fig.update_layout(title=f'{ticker} Stock Price with Moving Averages',
+                                  yaxis_title='Stock Price (USD)',
+                                  xaxis_title='Date')
+                
+                # Render the candlestick chart in Streamlit
+                st.plotly_chart(fig)
 
                 # Step 4: Prepare Data for Machine Learning
                 data['Future Price'] = data['Close'].shift(-30)
